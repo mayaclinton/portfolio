@@ -22,7 +22,7 @@ const Navbar = () => {
     var geometry = new THREE.BoxGeometry(boxSize, boxSize, boxSize);
     var materialGreen = new THREE.MeshBasicMaterial({
       transparent: true,
-      color: 0xff0000,
+      color: 0x40e0d0,
       opacity: 0.4,
       side: THREE.DoubleSide,
     });
@@ -63,8 +63,31 @@ const Navbar = () => {
       }
     }
 
+      function updateObjectColors(time) {
+        for (var i = 0, l = parentContainer.children.length; i < l; i++) {
+          var particle = parentContainer.children[i];
+          var dest = particle.userData.dests[Math.floor(phase) % particle.userData.dests.length].clone();
+          var diff = dest.sub(particle.position);
+          particle.userData.speed.divideScalar(1.02); // Some drag on the speed
+          particle.userData.speed.add(diff.divideScalar(400)); // Modify speed by a fraction of the distance to the dest
+          particle.position.add(particle.userData.speed);
+          particle.lookAt(dest);
+  
+          // Calculate color based on time (transition from blue to red)
+          const hue = (time * 0.1) % 1; // Change color over time
+          const saturation = 0.8; // Adjust as needed
+          const lightness = 0.6; // Adjust as needed
+  
+          // Update the material color
+          particle.material.color.setHSL(hue, saturation, lightness);
+        }
+    }
+  
+
     function render() {
       phase += 0.002;
+      const currentTime = performance.now() * 0.001;
+      updateObjectColors(currentTime);
       for (var i = 0, l = parentContainer.children.length; i < l; i++) {
         var particle = parentContainer.children[i];
         var dest = particle.userData.dests[Math.floor(phase) % particle.userData.dests.length].clone();
